@@ -1,0 +1,47 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: onn-sh-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: onn-sh
+  template:
+    metadata:
+      labels:
+        app: onn-sh
+    spec:
+      containers:
+      - name: onn-sh
+        image: docker.io/koozie/onn.sh:ARM
+        ports:
+          - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: onn-sh-service
+spec:
+  ports:
+  - name: http
+    targetPort: 8080
+    port: 80
+  selector:
+    app: onn-sh
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: onn-sh-ingress
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - host: kube.onn.sh
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: onn-sh-service
+          servicePort: http
